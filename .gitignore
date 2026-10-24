@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+_test_*.py
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporales
+*.log
+*.tmp
+
+# Documento original del temario (no se publica en el sitio)
+calcula1/Template-Calculo.docx.pdf

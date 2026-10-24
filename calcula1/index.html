@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalculaMate · Tu calculadora de Cálculo 1</title>
+
+<!-- KaTeX: fórmulas bonitas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+<!-- function-plot: gráficas -->
+<script src="https://unpkg.com/d3@5/dist/d3.min.js"></script>
+<script src="https://unpkg.com/function-plot@1.22.8/dist/function-plot.js"></script>
+
+<!-- Pyodide: SymPy en el navegador -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.3/full/pyodide.js"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">∑ CalculaMate</div>
+  <div class="tagline">Tu Symbolab con esteroides · Cálculo 1 · con SymPy y GeoGebra</div>
+</header>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <p>Cargando el motor matemático (SymPy)… <span id="loadmsg">esto tarda unos segundos la primera vez</span></p>
+</div>
+
+<main id="app" class="app hidden">
+
+  <!-- Selector de modo -->
+  <div class="modes">
+    <button class="mode active" data-mode="funcion">ƒ Función</button>
+    <button class="mode" data-mode="tramos">⎰ Por tramos</button>
+    <button class="mode" data-mode="ecuacion">= Ecuación</button>
+    <button class="mode" data-mode="puntos">• Recta por puntos</button>
+    <button class="mode" data-mode="fg">f·g Operar f y g</button>
+    <button class="mode" data-mode="razones">Δ Razones de cambio</button>
+    <button class="mode" data-mode="grafica">✏️ Gráfica → ecuación</button>
+  </div>
+
+  <!-- Panel de entrada -->
+  <section class="input-panel">
+    <label class="lbl" id="input-label">Escribe tu función <span class="hint">(usa x como variable)</span></label>
+    <div class="input-row">
+      <input id="fx" type="text" placeholder="ej: x^2 - 4x + 3" value="x^2 - 4x + 3" autocomplete="off" spellcheck="false">
+      <button id="clear-btn" class="icon-btn" title="Borrar todo">✕</button>
+    </div>
+
+    <!-- Segundo input para modo f y g -->
+    <div id="gx-row" class="hidden">
+      <label class="lbl">Y la función g(x)</label>
+      <div class="input-row">
+        <input id="gx" type="text" placeholder="ej: sqrt(x-2)" value="sqrt(x-2)" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <!-- Selector de problema para razones de cambio -->
+    <div id="razon-row" class="hidden">
+      <label class="lbl">Elige un problema resuelto</label>
+      <select id="razon-sel" class="small-input" style="min-width:260px">
+        <option value="globo">🎈 Globo esférico que se infla</option>
+        <option value="escalera">🪜 Escalera que resbala</option>
+        <option value="tanque">🚰 Tanque cónico que se llena</option>
+      </select>
+    </div>
+
+    <!-- Plano interactivo para marcar puntos (modo gráfica→ecuación) -->
+    <div id="grafica-row" class="hidden">
+      <label class="lbl">Marca puntos en el plano <span class="hint">(haz clic; clic sobre un punto lo borra)</span></label>
+      <div class="plane-toolbar">
+        <label class="lbl" style="margin:0">Modelo</label>
+        <select id="modelo-sel" class="small-input">
+          <option value="auto">Automático (mejor ajuste)</option>
+          <option value="recta">Recta (grado 1)</option>
+          <option value="parabola">Parábola (grado 2)</option>
+          <option value="cubica">Cúbica (grado 3)</option>
+        </select>
+        <button id="plane-clear" class="chip">🗑️ Limpiar puntos</button>
+        <span id="plane-count" class="qlabel">0 puntos</span>
+      </div>
+      <svg id="plane" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet"></svg>
+      <p class="hint" style="margin-top:6px">Rango visible: x ∈ [−10, 10], y ∈ [−10, 10]. Pulsa una operación para ajustar.</p>
+    </div>
+
+    <div id="preview" class="preview"></div>
+
+    <!-- Teclado matemático en pantalla -->
+    <div class="keyboard" id="keyboard">
+      <div class="kb-tabs">
+        <button class="kb-tab active" data-kb="basico">Básico</button>
+        <button class="kb-tab" data-kb="funcs">Funciones</button>
+        <button class="kb-tab" data-kb="tramos">Tramos</button>
+      </div>
+
+      <div class="kb-page" data-page="basico">
+        <button class="key" data-ins="7">7</button>
+        <button class="key" data-ins="8">8</button>
+        <button class="key" data-ins="9">9</button>
+        <button class="key op-key" data-ins="/">÷</button>
+        <button class="key op-key" data-ins="(">(</button>
+        <button class="key op-key" data-ins=")">)</button>
+        <button class="key" data-ins="4">4</button>
+        <button class="key" data-ins="5">5</button>
+        <button class="key" data-ins="6">6</button>
+        <button class="key op-key" data-ins="*">×</button>
+        <button class="key op-key" data-ins="^2">x²</button>
+        <button class="key op-key" data-ins="^">xⁿ</button>
+        <button class="key" data-ins="1">1</button>
+        <button class="key" data-ins="2">2</button>
+        <button class="key" data-ins="3">3</button>
+        <button class="key op-key" data-ins="-">−</button>
+        <button class="key op-key" data-ins="sqrt()" data-caret="-1">√</button>
+        <button class="key op-key" data-ins="/">a/b</button>
+        <button class="key" data-ins="0">0</button>
+        <button class="key" data-ins=".">.</button>
+        <button class="key var-key" data-ins="x">x</button>
+        <button class="key op-key" data-ins="+">+</button>
+        <button class="key op-key" data-ins="pi">π</button>
+        <button class="key del-key" data-action="backspace">⌫</button>
+      </div>
+
+      <div class="kb-page hidden" data-page="funcs">
+        <button class="key fn-key" data-ins="sin()" data-caret="-1">sin</button>
+        <button class="key fn-key" data-ins="cos()" data-caret="-1">cos</button>
+        <button class="key fn-key" data-ins="tan()" data-caret="-1">tan</button>
+        <button class="key fn-key" data-ins="ln()" data-caret="-1">ln</button>
+        <button class="key fn-key" data-ins="log()" data-caret="-1">log</button>
+        <button class="key fn-key" data-ins="exp()" data-caret="-1">eˣ</button>
+        <button class="key fn-key" data-ins="asin()" data-caret="-1">asin</button>
+        <button class="key fn-key" data-ins="acos()" data-caret="-1">acos</button>
+        <button class="key fn-key" data-ins="atan()" data-caret="-1">atan</button>
+        <button class="key fn-key" data-ins="sinh()" data-caret="-1">sinh</button>
+        <button class="key fn-key" data-ins="cosh()" data-caret="-1">cosh</button>
+        <button class="key fn-key" data-ins="Abs()" data-caret="-1">|x|</button>
+        <button class="key op-key" data-ins="sqrt()" data-caret="-1">√</button>
+        <button class="key op-key" data-ins="oo">∞</button>
+        <button class="key op-key" data-ins="E">e</button>
+        <button class="key var-key" data-ins="x">x</button>
+        <button class="key del-key" data-action="backspace">⌫</button>
+      </div>
+
+      <div class="kb-page hidden" data-page="tramos">
+        <button class="key op-key wide" data-ins=" si ">si</button>
+        <button class="key op-key wide" data-ins=" ; ">; (otro tramo)</button>
+        <button class="key op-key" data-ins="{">{</button>
+        <button class="key op-key" data-ins="}">}</button>
+        <button class="key op-key" data-ins="<">&lt;</button>
+        <button class="key op-key" data-ins=">">&gt;</button>
+        <button class="key op-key" data-ins="<=">≤</button>
+        <button class="key op-key" data-ins=">=">≥</button>
+        <button class="key var-key" data-ins="x">x</button>
+        <button class="key op-key wide" data-ins="otro">otro caso</button>
+        <button class="key del-key" data-action="backspace">⌫</button>
+      </div>
+    </div>
+
+    <label class="lbl">¿Qué quieres calcular?</label>
+    <div class="ops" id="ops"></div>
+
+    <!-- Opciones contextuales -->
+    <div id="opt-punto" class="opts hidden">
+      <label class="lbl" id="punto-label">Punto (x →)</label>
+      <input id="punto" type="text" value="0" class="small-input">
+      <span class="hint">usa oo para infinito</span>
+    </div>
+    <div id="opt-lado" class="opts hidden">
+      <label class="lbl">Lado del límite</label>
+      <select id="lado" class="small-input">
+        <option value="">bilateral</option>
+        <option value="-">por la izquierda (−)</option>
+        <option value="+">por la derecha (+)</option>
+      </select>
+    </div>
+    <div id="opt-orden" class="opts hidden">
+      <label class="lbl">Orden del polinomio</label>
+      <input id="orden" type="text" value="4" class="small-input">
+    </div>
+
+    <div class="quick" id="quick-chips"></div>
+  </section>
+
+  <!-- Panel de resultados -->
+  <section class="results" id="results">
+    <div class="placeholder">👆 Elige un modo, escribe tu entrada y pulsa una operación para ver los pasos.</div>
+  </section>
+
+  <!-- Gráfica -->
+  <section class="graph-panel" id="graph-panel">
+    <h3>📊 Gráfica</h3>
+    <div id="plot"></div>
+    <p class="gg-note">📐 Los pasos incluyen cómo escribirlo en <b>GeoGebra</b> (botón <b>Copiar</b>).</p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  Hecho con <b>SymPy</b> (Pyodide) · <b>KaTeX</b> · <b>function-plot</b> — alineado al temario de Cálculo 1 🧠
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

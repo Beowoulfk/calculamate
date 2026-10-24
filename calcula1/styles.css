@@ -1,0 +1,123 @@
+:root{
+  --bg:#0f1225; --card:#1a1f3a; --card2:#232a4d; --line:#2e3769;
+  --accent:#7c5cff; --accent2:#22d3ee; --green:#34d399; --amber:#fbbf24; --pink:#f472b6;
+  --text:#e8ebff; --muted:#9aa3c7;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(1200px 600px at 15% -10%,#2a2060 0,transparent 60%),
+             radial-gradient(1000px 500px at 100% 0,#10324a 0,transparent 55%),var(--bg);
+  color:var(--text);min-height:100vh;padding-bottom:60px;
+}
+.hidden{display:none!important}
+
+.topbar{text-align:center;padding:26px 16px 10px}
+.logo{font-size:2rem;font-weight:800;
+  background:linear-gradient(90deg,var(--accent2),var(--accent),var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{color:var(--muted);margin-top:4px;font-size:.95rem}
+
+.loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:60px 20px;text-align:center;color:var(--muted)}
+.spinner{width:46px;height:46px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.app{max-width:960px;margin:0 auto;padding:10px 16px;display:grid;gap:20px}
+
+/* ---------- Modos ---------- */
+.modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.mode{background:var(--card);border:1px solid var(--line);color:var(--muted);
+  padding:10px 18px;border-radius:999px;cursor:pointer;font-size:.95rem;font-weight:600;transition:.15s}
+.mode:hover{border-color:var(--accent)}
+.mode.active{color:#fff;border-color:transparent;
+  background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+.input-panel,.results,.graph-panel{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+  box-shadow:0 14px 40px rgba(0,0,0,.3)
+}
+.lbl{display:block;color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+.lbl:first-child{margin-top:0}
+.hint{text-transform:none;letter-spacing:0;font-style:italic;color:#6b76a8}
+
+.input-row{display:flex;gap:10px;align-items:stretch}
+#fx{flex:1;background:#0b0e20;border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--text);font-size:1.15rem;font-family:'Consolas',monospace}
+#fx:focus{outline:none;border-color:var(--accent)}
+.icon-btn{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:10px;width:48px;cursor:pointer;font-size:1.1rem}
+.icon-btn:hover{border-color:var(--pink);color:var(--pink)}
+.small-input{background:#0b0e20;border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);min-width:90px;font-family:'Consolas',monospace}
+select.small-input{cursor:pointer}
+
+.preview{min-height:40px;margin-top:12px;padding:10px;text-align:center;font-size:1.4rem;background:#0b0e20;border-radius:10px;border:1px dashed var(--line);overflow-x:auto}
+
+/* ---------- Teclado ---------- */
+.keyboard{margin-top:16px;background:#0b0e20;border:1px solid var(--line);border-radius:12px;padding:12px}
+.kb-tabs{display:flex;gap:6px;margin-bottom:10px}
+.kb-tab{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--muted);
+  padding:8px;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600}
+.kb-tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),#5b7cff);border-color:transparent}
+.kb-page{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.key{background:var(--card2);border:1px solid var(--line);color:var(--text);
+  padding:12px 4px;border-radius:9px;cursor:pointer;font-size:1rem;font-family:'Consolas',monospace;transition:.1s;user-select:none}
+.key:hover{border-color:var(--accent);transform:translateY(-1px)}
+.key:active{transform:translateY(1px);background:var(--accent)}
+.key.wide{grid-column:span 2}
+.op-key{color:var(--accent2)}
+.fn-key{color:var(--amber);font-size:.9rem}
+.var-key{color:var(--pink);font-weight:700}
+.del-key{color:var(--pink)}
+@media(max-width:560px){
+  .kb-page{grid-template-columns:repeat(4,1fr)}
+}
+
+.ops{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.op{background:var(--card2);border:1px solid var(--line);color:var(--text);padding:13px;border-radius:10px;cursor:pointer;font-size:.92rem;transition:.15s;text-align:left}
+.op:hover{border-color:var(--accent);background:#2b3463;transform:translateY(-1px)}
+.op.active{border-color:var(--accent2);background:linear-gradient(90deg,rgba(124,92,255,.3),rgba(34,211,238,.15))}
+
+.opts{margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.opts .lbl{margin:0}
+
+.quick{margin-top:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qlabel{color:var(--muted);font-size:.85rem}
+.chip{background:#0b0e20;border:1px solid var(--line);color:var(--accent2);padding:6px 12px;border-radius:999px;cursor:pointer;font-size:.9rem}
+.chip:hover{border-color:var(--accent2)}
+
+.results{min-height:120px}
+.placeholder{color:var(--muted);text-align:center;padding:30px}
+
+.step{background:var(--card2);border-left:4px solid var(--accent);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.step .tag{display:inline-block;background:linear-gradient(90deg,var(--accent),#5b7cff);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.5px;padding:4px 11px;border-radius:999px;text-transform:uppercase;margin-bottom:10px}
+.step .math{font-size:1.25rem;margin:8px 0;overflow-x:auto}
+.step p{color:#cfd5f5;margin:6px 0}
+.step .explain{color:var(--muted);font-size:.92rem}
+
+.final{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,rgba(52,211,153,.15),rgba(34,211,238,.08));border:1px solid var(--green);border-radius:12px;padding:16px 20px;margin-top:8px;font-size:1.2rem;overflow-x:auto}
+.final .check{font-size:1.4rem}
+
+.err{background:rgba(244,114,182,.12);border:1px solid var(--pink);border-radius:10px;padding:14px 18px;color:#ffd9ec}
+
+/* ---------- Bloque GeoGebra ---------- */
+.geogebra{margin-top:12px;background:#0a1626;border:1px solid #1d3a5f;border-radius:10px;overflow:hidden}
+.gg-head{display:flex;align-items:center;justify-content:space-between;
+  background:rgba(34,211,238,.1);padding:7px 12px;color:#7fe3f4;font-size:.85rem;font-weight:600}
+.gg-copy{background:#22d3ee;color:#04202a;border:none;border-radius:6px;padding:4px 12px;
+  cursor:pointer;font-size:.8rem;font-weight:700}
+.gg-copy:hover{background:#4fe0f3}
+.gg-code{padding:10px 12px;color:#cfeff7;font-family:'Consolas',monospace;font-size:.95rem;
+  white-space:pre-wrap;word-break:break-word}
+.gg-note{color:var(--muted);font-size:.85rem;margin-top:10px;font-style:italic}
+
+/* ---------- Plano interactivo (gráfica→ecuación) ---------- */
+.plane-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+#plane{width:100%;height:auto;max-height:440px;background:#0b0e20;border:1px solid var(--line);
+  border-radius:12px;cursor:crosshair;display:block;touch-action:none}
+.plane-pt{cursor:pointer;transition:r .1s}
+.plane-pt:hover{r:8}
+
+.graph-panel h3{margin-bottom:12px}
+#plot{background:#0b0e20;border-radius:10px;overflow:hidden}
+.function-plot .origin,.function-plot .tick line{stroke:#2a3160}
+.function-plot text{fill:#9aa3c7}
+
+.foot{text-align:center;color:var(--muted);font-size:.85rem;margin-top:30px;padding:0 16px}
