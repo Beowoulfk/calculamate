@@ -99,13 +99,19 @@ const OPT_FOR = {
 
 // ---------- Arranque ----------
 async function boot() {
+  const setMsg = (t) => { const el = $("#loadmsg"); if (el) el.textContent = t; };
   try {
-    $("#loadmsg").textContent = "descargando Python…";
-    pyodide = await loadPyodide();
-    $("#loadmsg").textContent = "instalando SymPy…";
-    await pyodide.loadPackage("sympy");
-    $("#loadmsg").textContent = "preparando el solver…";
-    const solverCode = await (await fetch("solver.py")).text();
+    // 1) Empezamos a descargar el solver EN PARALELO con la carga de Pyodide.
+    //    (antes era secuencial; esto ahorra una espera)
+    const solverPromise = fetch("solver.py").then((r) => r.text());
+
+    setMsg("descargando el motor de Python (una vez, luego queda en caché)…");
+    // 2) Cargamos Pyodide y SymPy juntos: 'packages' los baja durante la init,
+    //    en paralelo, en lugar de en dos pasos separados.
+    pyodide = await loadPyodide({ packages: ["sympy"] });
+
+    setMsg("preparando el solver…");
+    const solverCode = await solverPromise;
     pyodide.runPython(solverCode);
 
     solverReady = true;
@@ -118,7 +124,8 @@ async function boot() {
     plot(fxInput.value);
   } catch (e) {
     $("#loading").innerHTML =
-      `<div class="err">No se pudo cargar el motor: ${e}. Revisa tu conexión a internet.</div>`;
+      `<div class="err">No se pudo cargar el motor: ${e}.<br>
+       Revisa tu conexión a internet y recarga la página (F5).</div>`;
   }
 }
 

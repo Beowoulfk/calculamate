@@ -18,9 +18,16 @@ body{
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .tagline{color:var(--muted);margin-top:4px;font-size:.95rem}
 
-.loading{display:flex;flex-direction:column;align-items:center;gap:16px;padding:60px 20px;text-align:center;color:var(--muted)}
+.loading{display:flex;flex-direction:column;align-items:center;gap:14px;padding:60px 20px;text-align:center;color:var(--muted);max-width:560px;margin:0 auto}
 .spinner{width:46px;height:46px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.loadmsg{color:var(--accent2);font-family:'Consolas',monospace;font-size:.95rem;min-height:1.2em}
+.loadbar{width:min(360px,80vw);height:8px;background:#0b0e20;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.loadbar span{display:block;height:100%;width:40%;border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  animation:loadslide 1.4s ease-in-out infinite}
+@keyframes loadslide{0%{margin-left:-40%}100%{margin-left:100%}}
+.loadnote{font-size:.85rem;line-height:1.5;color:#7b84ad;max-width:460px}
 
 .app{max-width:960px;margin:0 auto;padding:10px 16px;display:grid;gap:20px}
 

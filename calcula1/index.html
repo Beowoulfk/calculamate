@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CalculaMate · Tu calculadora de Cálculo 1</title>
 
+<!-- Acelerar conexión a los CDN -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
 <!-- KaTeX: fórmulas bonitas -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -27,7 +32,12 @@
 
 <div id="loading" class="loading">
   <div class="spinner"></div>
-  <p>Cargando el motor matemático (SymPy)… <span id="loadmsg">esto tarda unos segundos la primera vez</span></p>
+  <p><b>Cargando el motor matemático (SymPy)…</b></p>
+  <p id="loadmsg" class="loadmsg">iniciando…</p>
+  <div class="loadbar"><span></span></div>
+  <p class="loadnote">La primera vez descarga Python (unos MB) y puede tardar
+     <b>10–30 segundos</b>. Después queda guardado en tu navegador y abre al instante.
+     Mientras carga, la página puede sentirse lenta: es normal, no la cierres.</p>
 </div>
 
 <main id="app" class="app hidden">
