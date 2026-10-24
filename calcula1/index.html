@@ -24,15 +24,8 @@
 ">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
-<!-- Anti-clickjacking: si la página se carga dentro de un iframe ajeno, rompe el marco.
-     (frame-ancestors por <meta> no funciona en Pages; esto sí.) -->
-<script>
-  if (window.top !== window.self) {
-    try { window.top.location = window.self.location; }
-    catch (e) { document.documentElement.innerHTML =
-      '<p style="color:#fff;font-family:sans-serif;padding:2rem">Esta página no puede mostrarse dentro de otro sitio.</p>'; }
-  }
-</script>
+<!-- Anti-clickjacking en archivo externo (la CSP no permite scripts inline) -->
+<script src="guard.js"></script>
 <!-- ===================================================== -->
 
 <!-- Acelerar conexión a los CDN -->
