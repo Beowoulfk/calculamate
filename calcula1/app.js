@@ -185,7 +185,9 @@ function renderPreview() {
   if (currentMode === "razones") { previewEl.innerHTML = ""; return; }
   const val = fxInput.value.trim();
   if (currentMode === "puntos") {
-    previewEl.innerHTML = `<span style="color:#9aa3c7">${val}</span>`;
+    // textContent (no innerHTML) para que NO se interprete como HTML: evita XSS
+    previewEl.textContent = val;
+    previewEl.style.color = "#9aa3c7";
     return;
   }
   if (!val) { previewEl.innerHTML = ""; return; }
@@ -244,7 +246,7 @@ function solve() {
       const data = JSON.parse(raw);
 
       if (!data.ok) {
-        resultsEl.innerHTML = `<div class="err">⚠️ ${data.error}</div>`;
+        showError(data.error);
         return;
       }
       renderSteps(data.pasos);
@@ -255,7 +257,7 @@ function solve() {
         if (data.fit) { PLANE.fitExpr = data.fit; drawPlane(); }
       }
     } catch (e) {
-      resultsEl.innerHTML = `<div class="err">⚠️ Error: ${e}</div>`;
+      showError("Error: " + e);
     }
 
     if (noPlot) {
@@ -265,6 +267,15 @@ function solve() {
       plot(plotOverride || fxInput.value);
     }
   }, 20);
+}
+
+// ---------- Mensaje de error seguro (sin innerHTML con datos) ----------
+function showError(msg) {
+  resultsEl.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "err";
+  div.textContent = "⚠️ " + String(msg);   // textContent = no se interpreta HTML
+  resultsEl.appendChild(div);
 }
 
 // ---------- Pintar pasos ----------
@@ -290,7 +301,10 @@ function renderSteps(pasos) {
     }
     const div = document.createElement("div");
     div.className = "step";
-    div.innerHTML = `<span class="tag">${p.tag}</span>`;
+    const tagSpan = document.createElement("span");
+    tagSpan.className = "tag";
+    tagSpan.textContent = p.tag;          // textContent: la etiqueta no se interpreta como HTML
+    div.appendChild(tagSpan);
     if (p.latex) {
       const math = document.createElement("div");
       math.className = "math";
@@ -580,7 +594,17 @@ function curvePath(exprText) {
 }
 
 function makeEvaluator(exprText) {
-  // convierte '^' a '**' y evalúa con Math; solo polinomios/funciones básicas
+  // SEGURIDAD: solo permitimos caracteres de expresiones matemáticas.
+  // Si aparece cualquier otra cosa (letras raras, símbolos, paréntesis de llamada
+  // sospechosos), rechazamos en vez de evaluar: evita inyección de código.
+  const permitido = /^[0-9xX+\-*/^().,\s a-z]*$/;   // dígitos, x, operadores y nombres de funciones
+  const funcionesOK = /^(x|X|sin|cos|tan|sqrt|exp|log|pi|e|E)$/;
+  if (!permitido.test(exprText)) return null;
+  // validar que cada "palabra" alfabética sea una función/constante conocida
+  const palabras = exprText.match(/[a-zA-Z]+/g) || [];
+  for (const w of palabras) {
+    if (!funcionesOK.test(w)) return null;
+  }
   let js = exprText
     .replace(/\^/g, "**")
     .replace(/\bx\b/g, "(X)")
@@ -589,7 +613,7 @@ function makeEvaluator(exprText) {
     .replace(/pi/g, "Math.PI");
   try {
     // eslint-disable-next-line no-new-func
-    const fn = new Function("X", `try { return ${js}; } catch { return NaN; }`);
+    const fn = new Function("X", `"use strict"; try { return ${js}; } catch { return NaN; }`);
     fn(0); // smoke test
     return fn;
   } catch { return null; }
